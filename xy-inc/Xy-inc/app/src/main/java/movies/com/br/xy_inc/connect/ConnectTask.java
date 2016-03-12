@@ -25,6 +25,7 @@ import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
 
 import movies.com.br.xy_inc.ActPrincipal;
+import movies.com.br.xy_inc.bo.adapter.SearchListAdapter;
 
 /**
  * Created by danilo on 10/03/16.
@@ -34,12 +35,17 @@ public class ConnectTask extends AsyncTask<Void, Void, Map<String, Object>> {
     private Map<String, String> params = null;
     private String baseUrl = "http://www.omdbapi.com/?";
     private ActPrincipal act = null;
+    private SearchListAdapter adapter = null;
 
     public ConnectTask(Map<String, String> params, ActPrincipal act) {
         this.params = params;
         this.act = act;
     }
 
+    public ConnectTask(Map<String, String> params, SearchListAdapter adapter) {
+        this.params = params;
+        this.adapter = adapter;
+    }
 
     @Override
     protected Map<String, Object> doInBackground(Void... params) {
@@ -90,8 +96,12 @@ public class ConnectTask extends AsyncTask<Void, Void, Map<String, Object>> {
 
     @Override
     protected void onPostExecute(Map<String, Object> result) {
-        List<Map> movies = (List<Map>) result.get("Search");
-        act.carregarLista(movies);
+         if (act != null) {
+             List<Map> movies = (List<Map>) result.get("Search");
+            act.carregarLista(movies);
+        } else if (adapter != null) {
+            adapter.salveMovie(result);
+        }
 
     }
 

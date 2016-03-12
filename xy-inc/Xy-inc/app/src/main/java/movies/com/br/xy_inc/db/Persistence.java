@@ -1,8 +1,17 @@
 package movies.com.br.xy_inc.db;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
+import movies.com.br.xy_inc.exception.ValidationException;
 
 /**
  * Created by danilo on 10/03/16.
@@ -12,7 +21,7 @@ public class Persistence {
     private SQLiteDatabase database;
     private Context context;
 
-    public Persistence() {
+    public Persistence(Context context) {
         this.context = context;
         createDatabase();
     }
@@ -33,6 +42,13 @@ public class Persistence {
         database = helper.getWritableDatabase();
         database.execSQL("PRAGMA synchronous=NORMAL");
 
+        //a partir daqui cria a(s) tabela(s)
+        try {
+            createTables();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
     }
 
 
@@ -46,8 +62,76 @@ public class Persistence {
      }
 
     //FIXME problema? criar novas colunas fica dificil com o ddl statico
-    private void createTableMovie() {
-        StringBuilder builder = new StringBuilder();
+    private void createTables() throws SQLException {
+
+        Map<String, Map<String, String>> tables = Tables.getTables();
+
+        for (Map.Entry<String, Map<String, String>> table : tables.entrySet()) {
+            StringBuilder builder = new StringBuilder();
+            builder.append("CREATE TABLE IF NOT EXISTS ");
+            builder.append(table.getKey()).append("(");
+
+            //começa a percorrer as colunas
+            for(Map.Entry<String, String> column: table.getValue().entrySet()) {
+                if (column.getKey().equals("pk")) {
+                    builder.append("PRIMARY KEY(").append(column.getValue()).append("))");
+                } else {
+                    builder.append(column.getKey()).append(" ").append(column.getValue()).append(",");
+                }
+            }
+
+            try {
+                validateTable(table.getKey(), table.getValue());
+            } catch (ValidationException e) {
+                Log.i("Movie", e.getMessage());
+                Log.i("Movie", "Recreate table "+table.getKey());
+                dropTable(table.getKey());
+            }
+
+            database.execSQL(builder.toString());
+        }
+
+    }
+
+    public void dropTable(String tableName) throws SQLException{
+        String dropQuery = "DROP TABLE IF EXISTS "+tableName;
+        database.execSQL(dropQuery);
+    }
+
+    private void validateTable(String tableName , Map<String, String> columns) throws ValidationException{
+        try {
+            Set<String> columnsName = columns.keySet();
+            StringBuilder str = new StringBuilder();
+            String delim = "";
+            for (String c : columnsName) {
+                str.append(delim);
+                str.append(c);
+
+                delim = ", ";
+            }
+            String query = "select " +  str.toString() + " from " + tableName + " where 1 = 2";
+            database.execSQL(query);
+        } catch (SQLException e) {
+           throw new ValidationException("Invalid table "+tableName);
+        }
+
+    }
+
+    public void save(String table, Map<String, Object> value) throws SQLException {
+        Map<String, String> columns = Tables.getColumn(table);
+        ContentValues values = new ContentValues();
+        for (Map.Entry<String, String> column : columns.entrySet()) {
+            Object objValue = value.get(column.getKey());
+            if (objValue instanceof Integer) {
+                values.put(column.getKey(), (Integer) objValue);
+            } else if (objValue instanceof String) {
+                values.put(column.getKey(), (String) objValue);
+            }
+            //se precisar de mais tipagem é só colocar mais ifs
+        }
+
+        database.insert(table, null, values);
+
     }
 
 

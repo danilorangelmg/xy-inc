@@ -40,6 +40,7 @@
             </LinearLayout>
 
             <ImageButton
+                android:id="@+id/list_search_movie_add"
                 android:layout_alignParentBottom="true"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
