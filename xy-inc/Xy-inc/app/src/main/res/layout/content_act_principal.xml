@@ -12,8 +12,21 @@
     tools:context="movies.com.br.xy_inc.ActPrincipal"
     tools:showIn="@layout/app_bar_act_principal">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!" />
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    <SearchView
+        android:id="@+id/search_movie"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"></SearchView>
+
+    <ListView
+        android:id="@+id/listMovies"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </ListView>
+
+    </LinearLayout>
 </RelativeLayout>

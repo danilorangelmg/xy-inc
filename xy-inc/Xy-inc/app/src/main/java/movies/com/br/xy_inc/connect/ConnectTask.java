@@ -24,6 +24,8 @@ import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import movies.com.br.xy_inc.ActPrincipal;
+
 /**
  * Created by danilo on 10/03/16.
  */
@@ -31,9 +33,11 @@ public class ConnectTask extends AsyncTask<Void, Void, Map<String, Object>> {
 
     private Map<String, String> params = null;
     private String baseUrl = "http://www.omdbapi.com/?";
+    private ActPrincipal act = null;
 
-    public ConnectTask(Map<String, String> params) {
+    public ConnectTask(Map<String, String> params, ActPrincipal act) {
         this.params = params;
+        this.act = act;
     }
 
 
@@ -87,6 +91,7 @@ public class ConnectTask extends AsyncTask<Void, Void, Map<String, Object>> {
     @Override
     protected void onPostExecute(Map<String, Object> result) {
         List<Map> movies = (List<Map>) result.get("Search");
+        act.carregarLista(movies);
 
     }
 

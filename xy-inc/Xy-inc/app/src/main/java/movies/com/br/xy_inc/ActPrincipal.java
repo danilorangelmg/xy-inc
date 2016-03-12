@@ -12,14 +12,26 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.SearchView;
+import android.widget.Toast;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
+import movies.com.br.xy_inc.bo.adapter.SearchListAdapter;
 import movies.com.br.xy_inc.connect.ConnectTask;
 
 public class ActPrincipal extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private  ListView lView = null;
+    private SearchListAdapter adapter = null;
+    private SearchView searchView = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,15 +39,6 @@ public class ActPrincipal extends AppCompatActivity
         setContentView(R.layout.act_principal);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -46,12 +49,26 @@ public class ActPrincipal extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("s","Batman");
-        params.put("page","2");
+        lView = (ListView) findViewById(R.id.listMovies);
+        searchView = (SearchView) findViewById(R.id.search_movie);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("s", query);
+                ConnectTask task = new ConnectTask(params, ActPrincipal.this);
+                task.execute();
+                return false;
+            }
 
-        ConnectTask task = new ConnectTask(params);
-        task.execute();
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+
+
+
     }
 
     @Override
@@ -79,9 +96,9 @@ public class ActPrincipal extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
+//        if (id == R.id.action_settings) {
+//            return true;
+//        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -110,4 +127,21 @@ public class ActPrincipal extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    public void carregarLista(List<Map> movies) {
+        adapter = new SearchListAdapter(movies, ActPrincipal.this.getApplicationContext());
+        lView.setAdapter(adapter);
+    }
+
+    public void onLongItemClickListener() {
+        lView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                Map<String, Object> movie = (Map<String, Object>) adapter.getItem(position);
+
+                return false;
+            }
+        });
+    }
+
 }
