@@ -1,10 +1,8 @@
-package movies.com.br.xy_inc;
+package movies.com.br.xy_inc.view;
 
 import android.Manifest;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -17,20 +15,20 @@ import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SearchView;
-import android.widget.Toast;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
+import movies.com.br.xy_inc.MoviesApplication;
+import movies.com.br.xy_inc.R;
 import movies.com.br.xy_inc.bo.adapter.SearchListAdapter;
 import movies.com.br.xy_inc.connect.ConnectTask;
 import movies.com.br.xy_inc.db.Persistence;
-import movies.com.br.xy_inc.util.QueryUtil;
+import movies.com.br.xy_inc.db.Query;
 import movies.com.br.xy_inc.util.Util;
 
-public class ActPrincipal extends AppCompatActivity
+public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private ListView lView = null;
@@ -131,7 +129,7 @@ public class ActPrincipal extends AppCompatActivity
     }
 
     public void carregarLista(List<Map> movies) {
-        adapter = new SearchListAdapter(movies, ActPrincipal.this.getApplicationContext());
+        adapter = new SearchListAdapter(movies, MainActivity.this.getApplicationContext());
         lView.setAdapter(adapter);
     }
 
@@ -151,10 +149,10 @@ public class ActPrincipal extends AppCompatActivity
         if (param != null) {
             where = persistence.generateWhereLike("title", param);
         }
-        Cursor cursor = persistence.find(QueryUtil.QUERY_FIND_MOVIE.concat(where));
+        Cursor cursor = persistence.find(Query.QUERY_FIND_MOVIE.concat(where));
         List<Map> movies = persistence.convertToList(cursor);
 
-        adapter = new SearchListAdapter(movies, ActPrincipal.this.getApplicationContext());
+        adapter = new SearchListAdapter(movies, MainActivity.this.getApplicationContext());
         lView.setAdapter(adapter);
     }
 
@@ -162,7 +160,7 @@ public class ActPrincipal extends AppCompatActivity
         lastSearchServer = param;
         Map<String, String> params = new HashMap<String, String>();
         params.put("s", param);
-        ConnectTask task = new ConnectTask(params, ActPrincipal.this);
+        ConnectTask task = new ConnectTask(params, MainActivity.this);
         task.execute();
     }
 

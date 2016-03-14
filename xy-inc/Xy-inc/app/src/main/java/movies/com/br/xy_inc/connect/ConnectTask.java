@@ -1,30 +1,24 @@
 package movies.com.br.xy_inc.connect;
 
 import android.os.AsyncTask;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import movies.com.br.xy_inc.ActPrincipal;
+import movies.com.br.xy_inc.view.MainActivity;
 import movies.com.br.xy_inc.bo.adapter.SearchListAdapter;
 
 /**
@@ -34,10 +28,10 @@ public class ConnectTask extends AsyncTask<Void, Void, Map<String, Object>> {
 
     private Map<String, String> params = null;
     private String baseUrl = "http://www.omdbapi.com/?";
-    private ActPrincipal act = null;
+    private MainActivity act = null;
     private SearchListAdapter adapter = null;
 
-    public ConnectTask(Map<String, String> params, ActPrincipal act) {
+    public ConnectTask(Map<String, String> params, MainActivity act) {
         this.params = params;
         this.act = act;
     }
