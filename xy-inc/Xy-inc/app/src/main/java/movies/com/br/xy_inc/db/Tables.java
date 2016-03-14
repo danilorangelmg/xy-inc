@@ -20,7 +20,7 @@ public class Tables {
     }
 
     public static Map<String, String> getColumn(String table) {
-        return getTables().get(table);
+            return getTables().get(table);
     }
 
 

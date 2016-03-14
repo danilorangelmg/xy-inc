@@ -56,8 +56,8 @@ public class ConnectTask extends AsyncTask<Void, Void, Map<String, Object>> {
             String response = "";
             URL url = new URL(getUrl(this.params));
             conn = (HttpURLConnection) url.openConnection();
-            conn.setReadTimeout(10000);
-            conn.setConnectTimeout(15000);
+            conn.setReadTimeout(60000);
+            conn.setConnectTimeout(60000);
             conn.setRequestMethod("POST");
             conn.setDoInput(true);
             conn.setRequestProperty("Content-Type", "application/json");
@@ -100,7 +100,7 @@ public class ConnectTask extends AsyncTask<Void, Void, Map<String, Object>> {
              List<Map> movies = (List<Map>) result.get("Search");
             act.carregarLista(movies);
         } else if (adapter != null) {
-            adapter.salveMovie(result);
+            adapter.onConnectResult(result);
         }
 
     }

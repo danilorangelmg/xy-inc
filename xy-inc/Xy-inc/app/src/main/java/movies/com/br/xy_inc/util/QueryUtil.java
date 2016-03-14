@@ -5,9 +5,5 @@ package movies.com.br.xy_inc.util;
  */
 public class QueryUtil {
 
-    public static String insertQuery() {
-        return "";
-    }
-
-
+    public static final String QUERY_FIND_MOVIE = "select * from tb_movies";
 }

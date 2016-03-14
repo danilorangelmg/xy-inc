@@ -2,11 +2,15 @@ package movies.com.br.xy_inc.db;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -59,6 +63,11 @@ public class Persistence {
 
     public void endTransaction() {
         //TODO controlar transac
+        try {
+            database.setTransactionSuccessful();
+        } finally {
+            database.endTransaction();
+        }
      }
 
     //FIXME problema? criar novas colunas fica dificil com o ddl statico
@@ -104,6 +113,9 @@ public class Persistence {
             StringBuilder str = new StringBuilder();
             String delim = "";
             for (String c : columnsName) {
+                if (c.equals("pk")) {
+                    continue;
+                }
                 str.append(delim);
                 str.append(c);
 
@@ -130,9 +142,39 @@ public class Persistence {
             //se precisar de mais tipagem é só colocar mais ifs
         }
 
+        beginTransaction();
         database.insert(table, null, values);
-
+        endTransaction();
     }
 
+    public Cursor find(String query) {
+        return database.rawQuery(query, null);
+    }
+
+    public List<Map> convertToList(Cursor cursor) {
+        List<Map> list = new ArrayList<Map>();
+        if (cursor.moveToFirst()) {
+            do {
+                Map<String, Object> row = new HashMap<String, Object>();
+                int countColumns = cursor.getColumnCount();
+                for (int i = 0; i < countColumns; i++) {
+                    //deixei string pq nesse caso todas as colunas são de texto
+                    row.put(cursor.getColumnName(i), cursor.getString(i));
+                }
+
+                list.add(row);
+
+            } while(cursor.moveToNext());
+        }
+        return list;
+    }
+
+    public String generateWhereLike(String column, String param) {
+        String where = " where ";
+        where = where.concat(column.concat(" like ").concat("'%").concat(param).concat("%'"));
+
+        return where;
+
+    }
 
 }
