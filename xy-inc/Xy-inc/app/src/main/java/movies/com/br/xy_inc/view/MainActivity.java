@@ -1,8 +1,11 @@
 package movies.com.br.xy_inc.view;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -15,6 +18,7 @@ import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.Toast;
 
 import java.util.HashMap;
 import java.util.List;
@@ -62,7 +66,7 @@ public class MainActivity extends AppCompatActivity
         adapterMap = new HashMap<String, SearchListAdapter>();
         lView = (ListView) findViewById(R.id.listMovies);
         searchView = (SearchView) findViewById(R.id.search_movie);
-        searchMyMovies("");
+        searchMyMovies(null);
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -80,6 +84,7 @@ public class MainActivity extends AppCompatActivity
                 return false;
             }
         });
+
     }
 
     @Override
@@ -129,31 +134,30 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void carregarLista(List<Map> movies) {
-        adapter = new SearchListAdapter(movies, MainActivity.this.getApplicationContext());
-        lView.setAdapter(adapter);
+        if (movies != null && movies.size() > 0) {
+            adapter = new SearchListAdapter(movies, MainActivity.this, this);
+            lView.setAdapter(adapter);
+        } else {
+            Toast.makeText(MainActivity.this, "A busca não retornou resultados!", Toast.LENGTH_LONG).show();
+        }
     }
 
-    public void onLongItemClickListener() {
-        lView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                Map<String, Object> movie = (Map<String, Object>) adapter.getItem(position);
-                return false;
-            }
-        });
-    }
 
-    private void searchMyMovies(String param) {
+    public  void searchMyMovies(String param) {
         Persistence persistence = MoviesApplication.getApplication().getPersistence();
         String where = "";
         if (param != null) {
             where = persistence.generateWhereLike("title", param);
         }
         Cursor cursor = persistence.find(Query.QUERY_FIND_MOVIE.concat(where));
-        List<Map> movies = persistence.convertToList(cursor);
+        if (cursor.getCount() > 0) {
+            List<Map> movies = persistence.convertToList(cursor);
 
-        adapter = new SearchListAdapter(movies, MainActivity.this.getApplicationContext());
-        lView.setAdapter(adapter);
+            adapter = new SearchListAdapter(movies, MainActivity.this,this);
+            lView.setAdapter(adapter);
+        } else {
+            Toast.makeText(MainActivity.this, "A busca não retornou resultados!", Toast.LENGTH_LONG).show();
+        }
     }
 
     private void searchMoviesServer(String param) {

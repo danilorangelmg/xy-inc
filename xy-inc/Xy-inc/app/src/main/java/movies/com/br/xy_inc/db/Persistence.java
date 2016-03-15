@@ -147,6 +147,14 @@ public class Persistence {
         endTransaction();
     }
 
+
+    public void delete(String table, String where, String[] args) throws SQLException {
+        beginTransaction();
+        database.delete(table, where, args);
+        endTransaction();
+    }
+
+
     public Cursor find(String query) {
         return database.rawQuery(query, null);
     }
