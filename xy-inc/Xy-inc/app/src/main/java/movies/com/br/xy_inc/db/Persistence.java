@@ -148,12 +148,34 @@ public class Persistence {
     }
 
 
+    public void delete(String table, Map<String, String> where) throws SQLException {
+        beginTransaction();
+
+        String delete = "delete from ".concat(table);
+
+        String whereStr = "";
+        if (where != null && where.size() > 0) {
+            whereStr = " where ";
+
+            for (Map.Entry<String, String> entry: where.entrySet()) {
+                //deixei padrao and, se precisar de or é so colocar mais um parametro
+                whereStr = whereStr.concat(entry.getKey()).concat(" ").concat(entry.getValue()).concat(" and ");
+            }
+
+            whereStr = whereStr.substring(0, whereStr.length()-3);
+        }
+
+        delete.concat(whereStr);
+        database.execSQL(delete);
+
+        endTransaction();
+    }
+
     public void delete(String table, String where, String[] args) throws SQLException {
         beginTransaction();
         database.delete(table, where, args);
         endTransaction();
     }
-
 
     public Cursor find(String query) {
         return database.rawQuery(query, null);

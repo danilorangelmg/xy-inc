@@ -30,6 +30,7 @@ import movies.com.br.xy_inc.connect.ConnectTask;
 import movies.com.br.xy_inc.connect.DownloadImage;
 import movies.com.br.xy_inc.util.Const;
 import movies.com.br.xy_inc.util.OnTouchViewListener;
+import movies.com.br.xy_inc.util.Util;
 import movies.com.br.xy_inc.view.MainActivity;
 
 /**
@@ -96,7 +97,7 @@ public class SearchListAdapter extends BaseAdapter {
         String title = (String) movie.get("Title");
         String year = (String) movie.get("Year");
         String url = (String) movie.get("Poster");
-        String genre = (String) movie.get("Rated");
+        String genre = (String) movie.get("genre");
         addRemoveButton.setImageResource(R.drawable.add);
 
         tvTitle.setText(title);
@@ -106,7 +107,7 @@ public class SearchListAdapter extends BaseAdapter {
         View container = (View) convertView.findViewById(R.id.list_search_movie_container);
 
         loadImage(url, poster, null);
-        buttonAddListener(addRemoveButton, (String) movie.get("imdbID"), false);
+        buttonAddListener(addRemoveButton, (String) movie.get("imdbID"),null, false);
         container.setOnClickListener(new SinopseClickListener(movie));
         container.setOnTouchListener(new OnTouchViewListener());
 
@@ -137,20 +138,25 @@ public class SearchListAdapter extends BaseAdapter {
         String path = (String) movie.get("image_path");
 
         loadImage(url, poster, path);
-        buttonAddListener(addRemoveButton, (String) movie.get("imdbID"), true);
+        buttonAddListener(addRemoveButton, (String) movie.get("imdbid"),path, true);
         container.setOnClickListener(new SinopseClickListener(movie));
         container.setOnTouchListener(new OnTouchViewListener());
     }
 
-    private void buttonAddListener(ImageButton addButton, final String imdbid, final boolean remove) {
+    private void buttonAddListener(ImageButton addButton, final String imdbid, final String path, final boolean remove) {
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (remove) {
-                    MoviesApplication.getApplication().getPersistence().delete("tb_movies", "imdbid="+imdbid, null);
+                    Map<String, String> where = new HashMap<String, String>();
+                    where.put("imdbid", imdbid);
+                    MoviesApplication.getApplication().getPersistence().delete("tb_movies", "imdbid='" + imdbid + "'", null);
                     Toast.makeText(context, "Registro removido com sucesso!", Toast.LENGTH_LONG).show();
+
+                    Util.removeImage(path);
+
                     //recarrega toda a lista
-                    activity.searchMyMovies(null);
+                    activity.searchMyMovies(null, true);
                 } else {
                     Map<String, String> params = new HashMap<String, String>();
                     params.put("i", imdbid);
@@ -167,25 +173,37 @@ public class SearchListAdapter extends BaseAdapter {
 
     public void onConnectResult(Map<String, Object> movie) {
         if (isPlot) {
-            isPlot = false;
-            View view = layoutInflater.inflate(R.layout.sinopse_dialog, null);
-            TextView title = (TextView) view.findViewById(R.id.dialog_title);
-            TextView body = (TextView) view.findViewById(R.id.dialog_sinopse);
-
-            String titleStr = (String) (movie.get("Title") == null ? movie.get("title") : movie.get("Title"));
-            String bodyStr = (String) (movie.get("Plot") == null ? movie.get("plot") : movie.get("Plot"));
-
-            title.setText(titleStr);
-            body.setText(bodyStr);
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-            builder.setView(view);
-            builder.create();
-            builder.show();
-
+            showSinopse(movie);
         } else {
             saveMovie(movie);
         }
+    }
+
+    private void showSinopse(Map<String, Object> movie) {
+        isPlot = false;
+        View view = layoutInflater.inflate(R.layout.sinopse_dialog, null);
+        TextView title = (TextView) view.findViewById(R.id.dialog_title);
+        TextView body = (TextView) view.findViewById(R.id.dialog_sinopse);
+        ImageView close = (ImageView) view.findViewById(R.id.dialog_close);
+
+        String titleStr = (String) (movie.get("Title") == null ? movie.get("title") : movie.get("Title"));
+        String bodyStr = (String) (movie.get("Plot") == null ? movie.get("plot") : movie.get("Plot"));
+
+        title.setText(titleStr);
+        body.setText(bodyStr);
+        close.setOnTouchListener(new OnTouchViewListener());
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setView(view);
+        final AlertDialog alert = builder.create();
+        builder.show();
+
+        close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alert.dismiss();
+            }
+        });
     }
 
     private void saveMovie(Map<String, Object> movie) {
@@ -202,7 +220,7 @@ public class SearchListAdapter extends BaseAdapter {
         try {
             String id = (String)moviesNameLowerCase.get("imdbid");
             Bitmap bitmap = (Bitmap) posterLoaded.get(moviesNameLowerCase.get("poster"));
-            path = salveImage(id, bitmap);
+            path = Util.salveImage(id, bitmap);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -221,35 +239,7 @@ public class SearchListAdapter extends BaseAdapter {
         Toast.makeText(context, "Registro adicionado com sucesso!" ,Toast.LENGTH_LONG).show();
     }
 
-    private String salveImage(String imdbid, Bitmap bitmap) throws FileNotFoundException {
 
-        String path = "";
-
-        File rootDir = new File(Const.IMAGE_PATH);
-        if (!rootDir.exists()) {
-            rootDir.mkdir();
-        }
-
-        try {
-            File image = new File(rootDir.getAbsolutePath(), imdbid.concat(".jpg"));
-
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, bytes);
-
-            image.createNewFile();
-            FileOutputStream fo = new FileOutputStream(image);
-            fo.write(bytes.toByteArray());
-
-            fo.close();
-
-            path = image.getAbsolutePath();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return path;
-    }
 
     private void loadImage(final String url, final ImageView poster, final String path) {
         android.os.Handler handler = new android.os.Handler();

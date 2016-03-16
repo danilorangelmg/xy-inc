@@ -20,6 +20,7 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,13 +67,13 @@ public class MainActivity extends AppCompatActivity
         adapterMap = new HashMap<String, SearchListAdapter>();
         lView = (ListView) findViewById(R.id.listMovies);
         searchView = (SearchView) findViewById(R.id.search_movie);
-        searchMyMovies(null);
+        searchMyMovies(null, false);
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 if (isMyMovieList) {
-                    searchMyMovies(query);
+                    searchMyMovies(query, false);
                 } else {
                     searchMoviesServer(query);
                 }
@@ -101,12 +102,37 @@ public class MainActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.act_principal, menu);
+
+        MenuItem search = menu.findItem(R.id.action_search);
+        MenuItem list = menu.findItem(R.id.action_list);
+
+        if (isMyMovieList) {
+            search.setVisible(true);
+            list.setVisible(false);
+        } else {
+            search.setVisible(false);
+            list.setVisible(true);
+        }
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
+
+        if (id == R.id.action_search) {
+            // Handle the camera action
+            if (!lastSearchServer.equals("")) {
+                searchMoviesServer(lastSearchServer);
+            }
+            isMyMovieList = false;
+        } else {
+            searchMyMovies("", false);
+            isMyMovieList = true;
+        }
+
+        this.invalidateOptionsMenu();
+
 
         return super.onOptionsItemSelected(item);
     }
@@ -124,7 +150,7 @@ public class MainActivity extends AppCompatActivity
             }
             isMyMovieList = false;
         } else if (id == R.id.nav_my_list) {
-            searchMyMovies("");
+            searchMyMovies("", false);
             isMyMovieList = true;
         }
 
@@ -143,7 +169,7 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    public  void searchMyMovies(String param) {
+    public  void searchMyMovies(String param, boolean recarregar) {
         Persistence persistence = MoviesApplication.getApplication().getPersistence();
         String where = "";
         if (param != null) {
@@ -153,10 +179,15 @@ public class MainActivity extends AppCompatActivity
         if (cursor.getCount() > 0) {
             List<Map> movies = persistence.convertToList(cursor);
 
+            //dava até para usar o add na list, mas teria que percorrer, fica melhor criar um nov adapter
             adapter = new SearchListAdapter(movies, MainActivity.this,this);
             lView.setAdapter(adapter);
         } else {
             Toast.makeText(MainActivity.this, "A busca não retornou resultados!", Toast.LENGTH_LONG).show();
+            if (recarregar) {
+                adapter = new SearchListAdapter(new ArrayList<Map>(), MainActivity.this,this);
+                lView.setAdapter(adapter);
+            }
         }
     }
 
