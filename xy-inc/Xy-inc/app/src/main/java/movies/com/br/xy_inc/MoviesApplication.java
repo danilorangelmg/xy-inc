@@ -3,7 +3,6 @@ package movies.com.br.xy_inc;
 import android.app.Application;
 
 import movies.com.br.xy_inc.db.Persistence;
-import movies.com.br.xy_inc.util.Util;
 
 /**
  * Created by danilo on 10/03/16.

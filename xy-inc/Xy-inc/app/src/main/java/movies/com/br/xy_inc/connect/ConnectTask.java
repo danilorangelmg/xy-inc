@@ -18,8 +18,8 @@ import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import movies.com.br.xy_inc.view.MainActivity;
 import movies.com.br.xy_inc.bo.adapter.SearchListAdapter;
+import movies.com.br.xy_inc.view.MainActivity;
 
 /**
  * Created by danilo on 10/03/16.
