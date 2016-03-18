@@ -6,8 +6,8 @@
 
 Config:
 Minimum sdk 23 (Android 6)
-> Developed with Android Studio
-> Recommended Device: Motorola Moto X 2014
+> Developed with Android Studio, 
+> Recommended Device: Motorola Moto X 2014;
 
 > This application uses the API OMDB
 > For more information on the api visit:
@@ -19,7 +19,7 @@ Minimum sdk 23 (Android 6)
 
 Config:
 Sdk minimo: 23(Android 6)
-> Desenvolvido com Android Studio
+> Desenvolvido com Android Studio,  
 > Dispositivo recomendado: Motorola Moto X 2014
 
 > Este aplicativo utiliza o OMDB API
