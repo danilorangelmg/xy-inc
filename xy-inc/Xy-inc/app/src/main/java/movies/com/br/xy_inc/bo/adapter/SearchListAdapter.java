@@ -179,26 +179,17 @@ public class SearchListAdapter extends BaseAdapter {
         View view = layoutInflater.inflate(R.layout.sinopse_dialog, null);
         TextView title = (TextView) view.findViewById(R.id.dialog_title);
         TextView body = (TextView) view.findViewById(R.id.dialog_sinopse);
-        ImageView close = (ImageView) view.findViewById(R.id.dialog_close);
 
         String titleStr = (String) (movie.get("Title") == null ? movie.get("title") : movie.get("Title"));
         String bodyStr = (String) (movie.get("Plot") == null ? movie.get("plot") : movie.get("Plot"));
 
         title.setText(titleStr);
         body.setText(bodyStr);
-        close.setOnTouchListener(new OnTouchViewListener());
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setView(view);
         final AlertDialog alert = builder.create();
         builder.show();
-
-        close.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                alert.dismiss();
-            }
-        });
     }
 
     private void saveMovie(Map<String, Object> movie) {
